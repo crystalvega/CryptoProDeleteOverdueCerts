@@ -43,7 +43,7 @@ def ParseCerts(text):
 
 def GetCerts():
     global certp
-    certp, cspp = CheckCryptoPro()
+    certp = CheckCryptoPro()
     cwd = getcwd()
     try:
         chdir(certp)
@@ -58,15 +58,13 @@ def GetCerts():
 
 def CheckCryptoPro():
     if path.exists(r'C:\Program Files\Crypto Pro\CSP\csptest.exe'):
-        cspp = r'C:\Program Files\Crypto Pro\CSP\csptest.exe'
         certp = 'C:\Program Files\Crypto Pro\CSP'
     elif path.exists(r'C:\Program Files (x86)\Crypto Pro\CSP\csptest.exe'):
-        cspp = r'C:\Program Files (x86)\Crypto Pro\CSP\csptest.exe'
         certp = 'C:\Program Files (x86)\Crypto Pro\CSP'
     else:
         sg.Popup('Ошибка!\nПрограммное обеспечение Крипто ПРО не найдено.')
         exit()
-    return certp, cspp
+    return certp
 
 def FindCKInReg(nameck):
     try:

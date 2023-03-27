@@ -10,7 +10,8 @@ def Main():
         e, certs = CertMgr.Delete(certsfordelete)
         if not e:
             Action.Error(certs)
-    print(1)
+        else:
+            Action.Success()
 
 if __name__ == "__main__":
     elevate(Main)
