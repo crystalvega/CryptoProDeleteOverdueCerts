@@ -1,0 +1,10 @@
+
+*.cfg
+*.pyc
+*.bat
+*.spec
+/dist
+/build
+/dist
+/SMART
+/__pycache__
