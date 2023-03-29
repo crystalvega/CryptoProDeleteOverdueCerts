@@ -37,7 +37,10 @@ def ParseCerts(text):
                     returnvalue[i].append(cert[1])
     for i in range(0, len(returnvalue)):
         if 'CN=' in returnvalue[i][0]:
+            ret = ''
             returnvalue[i][0] = returnvalue[i][0].split('CN=')[1]
+            if '" ' in returnvalue[i][0]:
+                returnvalue[i][0].split('" ')[0]
         returnvalue[i][2] = returnvalue[i][2].split('  ')[0]
         if len(returnvalue[i]) > 3:
             if 'FAT12' in returnvalue[i][3]:
