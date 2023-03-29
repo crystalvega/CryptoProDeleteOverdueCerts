@@ -105,7 +105,7 @@ def FindClosedContainer(certs):
                         dir_ck = FindCKInFat(con.replace('\\\\.\\FAT12_','').split('\\')[0], cert[3] + '.000')
                         datasaved.append('F')
                     else:
-                        dir_ck.append(None)
+                        dir_ck = None
                         datasaved.append('N')
                     returnvalue.append(dir_ck)
                     break
