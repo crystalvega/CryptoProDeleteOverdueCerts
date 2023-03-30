@@ -43,7 +43,7 @@ def ParseCerts(text):
         if '", ' in returnvalue[i][0]:
             returnvalue[i][0] = returnvalue[i][0].split('", ')[0] + '"'
         if ', ' in returnvalue[i][0]:
-            returnvalue[i][0] = returnvalue[i][0].split('", ')[0] + '"'
+            returnvalue[i][0] = returnvalue[i][0].split(', ')[0] + '"'
         if returnvalue[i][0].startswith('"'):
             returnvalue[i][0] = returnvalue[i][0][1:]
         if returnvalue[i][0].endswith('"'):
