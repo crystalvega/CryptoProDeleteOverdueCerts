@@ -37,10 +37,21 @@ def ParseCerts(text):
                     returnvalue[i].append(cert[1])
     for i in range(0, len(returnvalue)):
         if 'CN=' in returnvalue[i][0]:
-            ret = ''
             returnvalue[i][0] = returnvalue[i][0].split('CN=')[1]
-            if '" ' in returnvalue[i][0]:
-                returnvalue[i][0].split('" ')[0]
+        if '>, ' in returnvalue[i][0]:
+            returnvalue[i][0] = returnvalue[i][0].split('>, ')[0] + '>'
+        if '", ' in returnvalue[i][0]:
+            returnvalue[i][0] = returnvalue[i][0].split('", ')[0] + '"'
+        if ', ' in returnvalue[i][0]:
+            returnvalue[i][0] = returnvalue[i][0].split('", ')[0] + '"'
+        if returnvalue[i][0].startswith('"'):
+            returnvalue[i][0] = returnvalue[i][0][1:]
+        if returnvalue[i][0].endswith('"'):
+            returnvalue[i][0] = returnvalue[i][0][:-1]
+        while '""' in returnvalue[i][0]:
+            returnvalue[i][0] = returnvalue[i][0].replace('""', '"')
+        if 'МУНИЦИПАЛЬНОЕ КАЗЕННОЕ УЧРЕЖДЕНИЕ' in returnvalue[i][0]:
+            returnvalue[i][0] = returnvalue[i][0].replace('МУНИЦИПАЛЬНОЕ КАЗЕННОЕ УЧРЕЖДЕНИЕ', 'МКУ')
         returnvalue[i][2] = returnvalue[i][2].split('  ')[0]
         if len(returnvalue[i]) > 3:
             if 'FAT12' in returnvalue[i][3]:
@@ -165,10 +176,10 @@ def Delete(certs):
     certserror =[]
     retvalue = True
     for cert in certs:
-        if cert[3] == 'R':
-            DeleteCKfromR(cert[2])
-        if cert[3] == 'F':
-            DeleteCKfromF(cert[2])
+        if cert[4] == 'R':
+            DeleteCKfromR(cert[3])
+        if cert[4] == 'F':
+            DeleteCKfromF(cert[3])
         ret = subprocess.run(['certmgr.exe', '-delete', '-thumbprint', cert[1]], shell=True, capture_output=True, text=True, encoding='866').returncode
         if ret != 0:
             certserror.append(cert)

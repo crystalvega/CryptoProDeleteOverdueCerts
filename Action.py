@@ -16,10 +16,12 @@ def DateFrom():
         if event == "Выбрать":
             window.close()
             selectdate = DateSelector.popup_get_date()
-            if selectdate != None:
-                listof = [sg.Input(default_text=selectdate[1],size=(4,4), key='fac1'), sg.Text("."), sg.Input(default_text=selectdate[0],size=(4,4), key='fac2'), sg.Text("."), sg.Input(default_text=selectdate[2],size=(8,4),key='fac3'), sg.Button('Выбрать')]
-                layout = [[sg.Text("Введите дату до которой не требуется удалять")], [sg.Text("сертификаты в формате ДД.ММ.ГГГГ(опционально): ")], listof, [sg.Button("ОК")]]
+            if selectdate == None:
+                selectdate = ['','','']
+            listof = [sg.Input(default_text=selectdate[1],size=(4,4), key='fac1'), sg.Text("."), sg.Input(default_text=selectdate[0],size=(4,4), key='fac2'), sg.Text("."), sg.Input(default_text=selectdate[2],size=(8,4),key='fac3'), sg.Button('Выбрать')]
+            layout = [[sg.Text("Введите дату после которой не требуется удалять")], [sg.Text("сертификаты в формате ДД.ММ.ГГГГ(опционально): ")], listof, [sg.Button("ОК")]]
             window = sg.Window(progname, layout, use_default_focus=False)
+            
         if event == sg.WIN_CLOSED:
             window.close()
             return 'E'
@@ -27,9 +29,11 @@ def DateFrom():
             window.close()
             val = [values['fac1'],values['fac2'],values['fac3']]
             try:
-                datetime.date(val[2],val[1],val[0])
+                datetime.date(int(val[2]),int(val[1]),int(val[0]))
                 return val
             except TypeError:
+                return None
+            except ValueError:
                 return None
 
 def NotFound():
@@ -72,13 +76,44 @@ def Error(certs):
         if event == "ОК" or event == sg.WIN_CLOSED:
             window.close()
             break
-
-def Confirm(certsfordelete):
-    listof = [[sg.Text("ВНИМАНИЕ! Будут удалены следующие сертификаты: ")]]
-    for cert in certsfordelete:
-        listof.append([sg.Text('- ' +cert[0])])
         
-    layout = listof,[[sg.Button("Подтверждаю"), sg.Button("Отмена")]]
+def Edit(certs):
+    certlist = []
+    for index,cert in enumerate(certs):
+        certlist.append(str(index+1) +'. (До ' + cert[2] + ") " + cert[0])
+    text = [sg.Text('Выберите сертификаты, которые нужно убрать из списка:',size=(80, 2), font='Lucida', justification='center')]
+    layout=[text,
+            [sg.Listbox(values=certlist,select_mode='multiple', key='fac', size=(100,20))],
+        [sg.Button('Убрать из списка', font=('Times New Roman',12))]]
+
+    win = sg.Window(progname,layout)
+    
+    while True:
+        event, values = win.read()
+        if event == "Убрать из списка":
+            win.close()
+            retcert = []
+            delcert = []
+            for val in values['fac']:
+                delcert.append(certs[int(val.split('. ')[0])-1])
+            for cert in certs:
+                if cert not in delcert:
+                    retcert.append(cert)
+            return retcert, certs
+        if event == sg.WIN_CLOSED:
+            win.close()
+            return None
+
+def Confirm(certsfordelete, allcerts=None):
+    listof = [[sg.Text("ВНИМАНИЕ! Будут удалены следующие сертификаты: ")]]
+    if allcerts is None:
+        for cert in certsfordelete:
+            listof.append([sg.Text('- (До ' +cert[2] + ') ' + cert[0])])
+    else:
+        for cert in allcerts:
+            listof.append([sg.Text('- (До ' +cert[2] + ') ' + cert[0])])
+        
+    layout = listof,[[sg.Button("Подтверждаю"), sg.Button("Редактировать"), sg.Button("Отмена")]]
 
     window = sg.Window(progname, layout)
 
@@ -86,24 +121,31 @@ def Confirm(certsfordelete):
         event, values = window.read()
         if event == "Отмена" or event == sg.WIN_CLOSED:
             window.close()
-            return False
+            return None
+        if event == "Редактировать":
+            window.close()
+            try:
+                certsfordelete, ac = Edit(certsfordelete)
+            except TypeError:
+                return None
+            return Confirm(ac, certsfordelete)
         if event == "Подтверждаю" :
             window.close()
-            return True
+            try:
+                return certsfordelete
+            except UnboundLocalError:
+                return None
 
-def GetOldCerts(certlist, fromdate=None):
+def GetOldCerts(certlist, fromdate):
     datereturn = []
     if fromdate is not None:
-        fromdate = datetime.date(int(fromdate[2]),int(fromdate[1]),int(fromdate[0]))
-    today = datetime.date.today()
+        today = datetime.date(int(fromdate[2]),int(fromdate[1]),int(fromdate[0]))
+    else:
+        today = datetime.date.today()
     for cert in certlist:
         unformdate = cert[2].split('/')
         anotherday = datetime.date(int(unformdate[2]), int(unformdate[1]), int(unformdate[0]))
         diff = anotherday - today
         if diff.days < 0:
-            if fromdate is not None:
-                if anotherday > fromdate:
-                    datereturn.append((cert[0],cert[1], cert[3], cert[4]))
-            else:
-                datereturn.append((cert[0],cert[1], cert[3], cert[4]))
+            datereturn.append(cert)
     return datereturn

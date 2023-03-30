@@ -11,7 +11,8 @@ def Main():
         if len(certsfordelete) == 0:
             Action.NotFound()
         else:
-            if Action.Confirm(certsfordelete):
+            certsfordelete = Action.Confirm(certsfordelete)
+            if certsfordelete is not None:
                 e, certs = CertMgr.Delete(certsfordelete)
                 if not e:
                     Action.Error(certs)
