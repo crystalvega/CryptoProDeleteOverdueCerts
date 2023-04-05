@@ -132,7 +132,10 @@ def Confirm(certsfordelete, allcerts=None):
         if event == "Подтверждаю" :
             window.close()
             try:
-                return certsfordelete
+                if allcerts == None:
+                    return certsfordelete
+                else:
+                    return allcerts
             except UnboundLocalError:
                 return None
 
